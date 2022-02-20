@@ -105,7 +105,7 @@ def tunePIDGain(motor_id_, Kp_int_, Ki_int_) :
     print('tunePID of motor', motor_id_, ' with Kp: ', Kp_int_, ' and Ki: ', Ki_int_)
     # pack data as big-endian
     msg_tx.data = struct.pack('>hhhh', int(Kp_int_), int(Ki_int_), 0, 0)
-    can_bus.send(msg_tx
+    can_bus.send(msg_tx)
 
 def readRMSEValue(filename_) :
     with open(filename_, 'r') as f:
@@ -136,6 +136,7 @@ def sendTestSequence() :
     # RMSE_Left, RMSE_Right = readRMSEValue(Report_filename)
 
 def main() :
+
     doAnotherLoop = True
     numberOfLoop = 0
 
