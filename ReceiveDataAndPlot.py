@@ -8,6 +8,8 @@ import signal
 import struct
 import sys
 from sklearn.metrics import mean_squared_error
+import time
+import os
 
 ### Global
 # CAN bus
@@ -38,6 +40,9 @@ MSE_Left = nan
 MSE_Right = nan
 
 def outputReport(lineToWrite):
+    if os.path.exists(Report_filename):
+        os.remove(Report_filename)
+
     with open(Report_filename, 'w') as f:
         f.write(lineToWrite)
     f.close()
@@ -46,8 +51,13 @@ def outputReport(lineToWrite):
 def usrProcess1(signum, frame):
     RUN_state = False
 
-    MSE_Left = mean_squared_error(wheelRPM_L_CMD, wheelRPM_L_Actual, squared=False)
-    MSE_Right = mean_squared_error(wheelRPM_R_CMD, wheelRPM_R_Actual, squared=False)
+    MSE_Left = 9999.0
+    if (len(wheelRPM_L_CMD) == len(wheelRPM_L_Actual)):
+        MSE_Left = mean_squared_error(wheelRPM_L_CMD, wheelRPM_L_Actual, squared=False)
+
+    MSE_Right = 9999.0
+    if (len(wheelRPM_R_CMD) == len(wheelRPM_R_Actual)):
+        MSE_Right = mean_squared_error(wheelRPM_R_CMD, wheelRPM_R_Actual, squared=False)
 
     # Write RMSE to report file
     txtToSend = 'RMSE_Left,' + str(MSE_Left) + ',RMSE_Right,' + str(MSE_Right) + '\n'
@@ -61,7 +71,6 @@ def usrProcess1(signum, frame):
     plt.text(0, 0, mse_txt, fontsize=10, color='darkred')
     plt.xlabel('X-axis')
     plt.ylabel('RPM')
-    # plt.legend(loc='upper left')
     plt.legend()
 
     plt.figure(1)
@@ -72,12 +81,15 @@ def usrProcess1(signum, frame):
     plt.text(0, 0, mse_txt, fontsize=10, color='darkred')
     plt.xlabel('X-axis')
     plt.ylabel('RPM')
-    # plt.legend(loc='upper left')
     plt.legend()
 
     # Show plot
     plt.show()
 
+    time.sleep(2)
+
+    # Free CAN bus
+    can_bus.shutdown()
     # End process
     sys.exit(0)
 
